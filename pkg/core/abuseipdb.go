@@ -1,17 +1,18 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"time"
 )
 
-// AbuseIPDBURL constant is defined in enrichment package or here.
-// If defined elsewhere, adjust the import accordingly.
+// AbuseIPDBURL is the endpoint for AbuseIPDB queries.
 const AbuseIPDBURL = "https://api.abuseipdb.com/api/v2/check"
 
-// QueryAbuseIPDB queries AbuseIPDB for a given IP.
-func QueryAbuseIPDB(ip, apiKey string, maxRetries int) (map[string]interface{}, error) {
+// QueryAbuseIPDB queries AbuseIPDB for a given IP address.
+// It accepts context to allow cancellation and deadlines.
+func QueryAbuseIPDB(ctx context.Context, ip, apiKey string, maxRetries int) (map[string]interface{}, error) {
 	headers := map[string]string{
 		"Key":    apiKey,
 		"Accept": "application/json",
@@ -20,7 +21,7 @@ func QueryAbuseIPDB(ip, apiKey string, maxRetries int) (map[string]interface{}, 
 		"ipAddress":    ip,
 		"maxAgeInDays": "90",
 	}
-	body, err := fetchWithRetries(AbuseIPDBURL, headers, params, maxRetries, 1)
+	body, err := fetchWithRetries(ctx, AbuseIPDBURL, headers, params, maxRetries, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -34,3 +35,4 @@ func QueryAbuseIPDB(ip, apiKey string, maxRetries int) (map[string]interface{}, 
 	}
 	return nil, errors.New("unexpected response from AbuseIPDB")
 }
+

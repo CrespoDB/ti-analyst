@@ -1,10 +1,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/CrespoDB/TI-analyst/pkg/core/enrichment"
 )
@@ -42,6 +44,12 @@ func main() {
 		content = string(data)
 	}
 
-	result := enrichment.EnrichText(content, abuseipdbKey, vtKey, *maxRetries)
+	// Create a context with a timeout (e.g., 30 seconds)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// Pass the context to the enrichment function
+	result := enrichment.EnrichText(ctx, content, abuseipdbKey, vtKey, *maxRetries)
 	fmt.Print(result)
 }
+
